@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainrot Quiz Bash!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #a78bfa, #fbcfe8, #bfdbfe);
+            padding: 1rem;
+        }
+
+        .quiz-container {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 48rem;
+            width: 100%;
+            text-align: center;
+            border: 4px dashed #a855f7;
+            transform: rotate(2deg);
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .quiz-container:hover {
+            transform: rotate(0deg);
+        }
+
+        .quiz-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #3730a3;
+            margin-bottom: 2rem;
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 0.05em;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(-5%);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            50% {
+                transform: translateY(0);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+
+        .image-display-area {
+            margin-bottom: 2.5rem;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 4px solid #f472b6;
+            padding: 1rem;
+            background-color: #f9fafb;
+            min-height: 12.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-display-area.dual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .image-display-area img {
+            width: 50%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 0.375rem;
+        }
+
+        .image-display-area .plus-symbol {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #9333ea;
+        }
+
+        .image-display-area.single img {
+            width: 100%;
+        }
+
+        .image-display-area.text-content p {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #1f2937;
+            line-height: 1.25;
+            white-space: pre-wrap;
+        }
+
+        .question-paragraph {
+            font-size: 1.875rem;
+            color: #374151;
+            margin-bottom: 2.5rem;
+            font-weight: 700;
+            line-height: 1.625;
+        }
+
+        .user-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            border: 4px solid #a78bfa;
+            border-radius: 9999px;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+
+        .user-input:focus {
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5);
+        }
+
+        .submit-button {
+            width: 100%;
+            background-image: linear-gradient(to right, #ec4899, #9333ea);
+            color: #fff;
+            font-weight: 800;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: scale(1);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button:hover {
+            background-image: linear-gradient(to right, #db2777, #7e22ce);
+            transform: scale(1.05);
+        }
+
+        .submit-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.75);
+        }
+
+        .message {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .message.correct {
+            color: #16a34a;
+        }
+
+        .message.incorrect {
+            color: #dc2626;
+        }
+
+        .final-link-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .final-link-section p {
+            font-size: 1.875rem;
+            color: #4b5563;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .final-link-section .link-description {
+            font-size: 1.25rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .final-link-section .reward-link {
+            background-color: #22c55e;
+            color: #fff;
+            font-weight: 800;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: scale(1);
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+            text-decoration: none;
+            animation: pulse 2s infinite;
+        }
+
+        .final-link-section .reward-link:hover {
+            background-color: #16a34a;
+            transform: scale(1.1);
+        }
+
+        .final-link-section .reward-link:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.75);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1 class="quiz-title">answer these to get link to gift</h1>
+
+        <div id="quizContent">
+        </div>
+
+        <div id="finalLinkSection" class="final-link-section" style="display: none;">
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                type: "dual",
+                images: [
+                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTeNbt7Fed0nChiBX7TmvnQ9g1N9aldl1EEQ&s",
+                    "https://play-lh.googleusercontent.com/XPM8u_fQrERAQFNp1byQgCphu6_q_WSrJutTm2PF9iQBYbOhVu3ubliUxHaoZVdhyro=w526-h296-rw"
+                ],
+                question: "Guess the name, its something u def are aware of'",
+                answer: "takli aatma",
+            },
+            {
+                type: "single_image",
+                image: "https://hips.hearstapps.com/esquire/assets/17/06/1486518012-side-eye.jpg",
+                question: "u fought with me for my address, u def remember it right .... SMQ ___/4",
+                answer: "136",
+            },
+            {
+                type: "text_display",
+                textDisplay: "for i in range(3):\n\t print('P'*i)",
+                question: "You sure u dont lie when u say that u know how to code now... the total number of P in output gonna be?",
+                answer: "3",
+            },
+            {
+                type: "single_image",
+                image: "https://preview.redd.it/b8kyphs4ygk51.jpg?width=640&crop=smart&auto=webp&s=62a887d888d3af204522d2b5ccd8fc85d96eafa2",
+                question: "1 + 1?",
+                answer: "1",
+            },
+        ];
+
+        const allSecretLinks = [
+            {
+                url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                description: "do come back on this page if error happens"
+            },
+            {
+                url: "https://youtu.be/qZZ58tGRcdU?si=Mxy3pOnP3aom2-Mf",
+                description: "ehe, i love you but there was a chance and i took it, FOR REAL THIS TIME SORRY , serious link----"
+            },
+            {
+                url: "https://mega.nz/folder/LI50SSYA#alfppLS_Up6yLPtw1f_5ow",
+                description: "TERI KSAM, ITS THE REAL LINK THIS TIMEEEE or is it...?"
+            }
+        ];
+
+        const quizContentDiv = document.getElementById('quizContent');
+        const finalLinkSectionDiv = document.getElementById('finalLinkSection');
+
+        let currentQuestionIndex = 0;
+        let userInput = "";
+        let message = "";
+        let showFinalLink = false;
+        let currentSecretLinkIndex = 0;
+
+        function initQuiz() {
+            const savedIndex = localStorage.getItem('quizLinkIndex');
+            if (savedIndex !== null) {
+                currentSecretLinkIndex = parseInt(savedIndex, 10);
+            }
+            console.log("Quiz Initialized. Current Link Index:", currentSecretLinkIndex);
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            console.log("Updating Display. Current Question Index:", currentQuestionIndex, "Show Final Link:", showFinalLink);
+            quizContentDiv.innerHTML = '';
+            finalLinkSectionDiv.style.display = 'none';
+
+            if (showFinalLink) {
+                finalLinkSectionDiv.style.display = 'flex';
+                finalLinkSectionDiv.innerHTML = `
+                    <p class="message">${message}</p>
+                    <p class="link-description">${allSecretLinks[currentSecretLinkIndex].description}</p>
+                    <a href="${allSecretLinks[currentSecretLinkIndex].url}" target="_blank" rel="noopener noreferrer" class="reward-link" id="rewardLink">
+                        Click Here for Your Brainrot Reward!
+                    </a>
+                `;
+                document.getElementById('rewardLink').addEventListener('click', handleLinkClick);
+
+            } else if (currentQuestionIndex < quizData.length) {
+                const currentQuizItem = quizData[currentQuestionIndex];
+                let imageHtml = '';
+
+                if (currentQuizItem.type === "dual") {
+                    imageHtml = `
+                        <div class="image-display-area dual">
+                            <img src="${currentQuizItem.images[0]}" alt="Meme Part 1" onerror="this.onerror=null;this.src='https://placehold.co/300x200/CCCCCC/000000?text=Image+1+Not+Found';" />
+                            <span class="plus-symbol">+</span>
+                            <img src="${currentQuizItem.images[1]}" alt="Meme Part 2" onerror="this.onerror=null;this.src='https://placehold.co/300x200/CCCCCC/000000?text=Image+2+Not+Found';" />
+                        </div>
+                    `;
+                } else if (currentQuizItem.type === "text_display") {
+                    imageHtml = `
+                        <div class="image-display-area text-content">
+                            <p>${currentQuizItem.textDisplay}</p>
+                        </div>
+                    `;
+                } else {
+                    imageHtml = `
+                        <div class="image-display-area single">
+                            <img src="${currentQuizItem.image}" alt="Meme Question ${currentQuestionIndex + 1}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/000000?text=Meme+Not+Found';" />
+                        </div>
+                    `;
+                }
+
+                quizContentDiv.innerHTML = `
+                    ${imageHtml}
+                    <p class="question-paragraph">${currentQuizItem.question}</p>
+                    <input type="text" value="${userInput}" placeholder="Enter your meme answer here..." class="user-input" id="userInput" aria-label="User answer input" autocomplete="off" />
+                    <button class="submit-button" id="submitButton">Submit Meme Answer</button>
+                    <p class="message ${message.includes('YEHHHHH') ? 'correct' : 'incorrect'}" id="message">${message}</p>
+                `;
+
+                const userInputElement = document.getElementById('userInput');
+                const submitButtonElement = document.getElementById('submitButton');
+                const messageElement = document.getElementById('message');
+
+                if (userInputElement) {
+                    userInputElement.addEventListener('input', handleInputChange);
+                    userInputElement.value = userInput;
+                }
+                if (submitButtonElement) {
+                    submitButtonElement.addEventListener('click', handleSubmit);
+                }
+                if (messageElement) {
+                    messageElement.textContent = message;
+                    messageElement.className = 'message';
+                }
+
+
+            } else {
+                quizContentDiv.innerHTML = `<p class="question-paragraph">All questions completed! Refresh to play again.</p>`;
+            }
+        }
+
+        function handleInputChange(event) {
+            userInput = event.target.value;
+            message = "";
+            const messageElement = document.getElementById('message');
+            if (messageElement) {
+                messageElement.textContent = message;
+                messageElement.className = 'message';
+            }
+            console.log("Input changed. User Input:", userInput);
+        }
+
+        function handleSubmit() {
+            const currentQuizItem = quizData[currentQuestionIndex];
+            console.log(`Submitting for Q${currentQuestionIndex + 1}. User Input: '${userInput}', Correct Answer: '${currentQuizItem.answer}'`);
+
+            if (userInput.toLowerCase() === currentQuizItem.answer.toLowerCase()) {
+                message = "YEHHHHH!!! LESSGOO babe-->";
+                const messageElement = document.getElementById('message');
+                if (messageElement) {
+                    messageElement.textContent = message;
+                    messageElement.classList.add('correct');
+                }
+
+                setTimeout(() => {
+                    if (currentQuestionIndex < quizData.length - 1) {
+                        currentQuestionIndex++;
+                        userInput = "";
+                        message = "";
+                        console.log(`Moving to Q${currentQuestionIndex + 1}. Input and message cleared.`);
+                        updateDisplay();
+                    } else {
+                        message = "You unlocked the game:";
+                        showFinalLink = true;
+                        userInput = "";
+                        console.log("Quiz completed. Showing final link.");
+                        updateDisplay();
+                    }
+                }, 1500);
+            } else {
+                message = "Seriosly ? CMON---";
+                const messageElement = document.getElementById('message');
+                if (messageElement) {
+                    messageElement.textContent = message;
+                    messageElement.classList.add('incorrect');
+                }
+                console.log("Incorrect answer. Try again.");
+            }
+        }
+
+        function handleLinkClick() {
+            const nextIndex = (currentSecretLinkIndex + 1) % allSecretLinks.length;
+            localStorage.setItem('quizLinkIndex', nextIndex.toString());
+            currentSecretLinkIndex = nextIndex;
+            console.log("Link clicked. Next Link Index stored:", currentSecretLinkIndex);
+        }
+
+        window.onload = initQuiz;
+
+    </script>
+</body>
+</html>
